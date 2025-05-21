@@ -103,13 +103,12 @@ export class WhatsappService {
       const fileExtension = fileType?.split('/')[1];
 
       const fileName = `${fileID}.${fileExtension}`;
-
-      const folderName = process.env.AUDIO_FILES_FOLDER;
+      const folderName = 'downloads';
 
       const folderPath = path.join(process.cwd(), folderName);
       const filePath = path.join(folderPath, fileName);
 
-      //check if the audio folder exists, if not create
+      //check if the folder exists, if not create
       if (!existsSync(folderPath)) {
         mkdirSync(folderPath);
       }
@@ -167,43 +166,6 @@ export class WhatsappService {
     }
   }
 
-  async sendAudioByUrl(messageSender: string, fileName: string) {
-    const audioUrl = `${process.env.SERVER_URL}/${fileName}`;
-    const data = JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to: messageSender,
-      type: 'audio',
-      audio: {
-        link: audioUrl,
-      },
-    });
-
-    try {
-      const response = this.httpService
-        .post(this.url, data, this.config)
-        .pipe(
-          map((res) => {
-            return res.data;
-          }),
-        )
-        .pipe(
-          catchError((error) => {
-            this.logger.error(error);
-            throw new BadRequestException(
-              'Error Posting To WhatsApp Cloud API',
-            );
-          }),
-        );
-
-      const messageSendingStatus = await lastValueFrom(response);
-
-      return `Audio sent successfully, response: ${messageSendingStatus}`;
-    } catch (error) {
-      this.logger.error(error);
-      return 'Axle broke!! Error Sending Audio!!';
-    }
-  }
   async markMessageAsRead(messageID: string) {
     const data = JSON.stringify({
       messaging_product: 'whatsapp',

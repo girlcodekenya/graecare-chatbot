@@ -1,8 +1,8 @@
 import { Body, Controller, Get, HttpCode, Logger, Post, Query } from '@nestjs/common';
 import * as process from 'node:process';
 import { WhatsappService } from './whatsapp.service';
-import { StabilityaiService } from 'src/stabilityai/stabilityai.service';
-import { OpenaiService } from 'src/openai/openai.service';
+import { StabilityaiService } from '../../stabilityai/stabilityai.service';
+import { OpenaiService } from '../../openai/openai.service';
 
 @Controller('whatsapp')
 export class WhatsappController {

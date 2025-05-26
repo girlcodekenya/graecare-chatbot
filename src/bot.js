@@ -6,7 +6,7 @@ const GraeBotKnowledgeBase = require('./knowledgeBase');
 
 // Environment variables
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const TELEGRAM_WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL; // Your HTTPS URL
+const TELEGRAM_WEBHOOK_URL = process.env.TELEGRAM_WEBHOOK_URL; // Your HTTPS URL (should be full URL)
 const PORT = process.env.PORT || 3000;
 
 if (!TELEGRAM_BOT_TOKEN) {
@@ -18,14 +18,14 @@ const bot = new TelegramBot(TELEGRAM_BOT_TOKEN);
 const kb = new GraeBotKnowledgeBase();
 
 // Express app for webhook
-
 const app = express();
 app.use(express.json());
 
-// Set webhook
+// Set webhook - FIXED: Don't append bot token to URL
 const setWebhook = async () => {
   try {
-    const webhookUrl = `${TELEGRAM_WEBHOOK_URL}/bot${TELEGRAM_BOT_TOKEN}`;
+    // FIXED: Use the webhook URL directly without appending bot token
+    const webhookUrl = TELEGRAM_WEBHOOK_URL;
     await bot.setWebHook(webhookUrl);
     console.log(`Webhook set to: ${webhookUrl}`);
   } catch (error) {
@@ -33,8 +33,8 @@ const setWebhook = async () => {
   }
 };
 
-// Webhook route
-app.post(`/bot${TELEGRAM_BOT_TOKEN}`, (req, res) => {
+// FIXED: Webhook route should be /telegram/webhook (not with bot token)
+app.post('/telegram/webhook', (req, res) => {
   bot.processUpdate(req.body);
   res.sendStatus(200);
 });
@@ -42,6 +42,11 @@ app.post(`/bot${TELEGRAM_BOT_TOKEN}`, (req, res) => {
 // Health check route
 app.get('/', (req, res) => {
   res.json({ status: 'GraeBot is running!', timestamp: new Date().toISOString() });
+});
+
+// Additional health check for webhook
+app.get('/telegram/webhook', (req, res) => {
+  res.json({ status: 'Webhook endpoint is ready', method: 'POST required' });
 });
 
 // Start command
